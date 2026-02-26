@@ -1,0 +1,243 @@
+<!doctype html>
+<html lang="es">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="icon" type="image/png" href="assets/img/favaicon.png">
+  <title>Control por Voz y Gestos</title>
+
+  <!-- Bootstrap + Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+
+  <link rel="stylesheet" href="assets/css/styles.css" />
+</head>
+
+<body class="text-light">
+  <!-- Fondo decorativo -->
+  <div class="bg-blur bg-blur-1"></div>
+  <div class="bg-blur bg-blur-2"></div>
+
+  <!-- NAVBAR ÚNICA -->
+  <nav class="navbar navbar-dark navbar-glass sticky-top">
+    <div class="container py-2 d-flex justify-content-between align-items-center flex-wrap gap-2">
+
+      <div class="d-flex align-items-center gap-2">
+        <span class="brand-dot"></span>
+        <span class="navbar-brand m-0 fw-semibold">
+          Control por Voz y Gestos
+          <span class="brand-sub ms-2 d-none d-md-inline">• Speech + OpenAI + MediaPipe</span>
+        </span>
+      </div>
+
+      <div class="d-flex align-items-center gap-2 flex-wrap">
+
+        <!-- Tabs -->
+        <ul class="nav nav-pills nav-pills-glass" id="controlTabs" role="tablist">
+          <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="tab-voz" data-bs-toggle="pill" data-bs-target="#pane-voz"
+              type="button" role="tab" aria-controls="pane-voz" aria-selected="true">
+              <i class="bi bi-mic-fill me-1"></i> Voz
+            </button>
+          </li>
+          <li class="nav-item" role="presentation">
+            <button class="nav-link" id="tab-gestos" data-bs-toggle="pill" data-bs-target="#pane-gestos"
+              type="button" role="tab" aria-controls="pane-gestos" aria-selected="false">
+              <i class="bi bi-hand-index-thumb me-1"></i> Gestos
+            </button>
+          </li>
+        </ul>
+
+        <!-- Orden Global -->
+        <span class="pill pill-idle" id="globalPill">
+          <i class="bi bi-lightning-charge-fill me-2"></i>
+          <span class="d-none d-sm-inline">Orden global:</span>
+          <b class="ms-1" id="globalCommand">—</b>
+        </span>
+
+      </div>
+    </div>
+  </nav>
+
+  <main class="container py-4">
+    <div class="tab-content" id="controlTabsContent">
+
+      <!-- =========================
+           PESTAÑA: VOZ
+      ========================== -->
+      <div class="tab-pane fade show active" id="pane-voz" role="tabpanel" aria-labelledby="tab-voz" tabindex="0">
+        <div class="mx-auto main-card">
+          <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+            <div class="section-title">
+              <i class="bi bi-soundwave me-2"></i>Transcripción
+            </div>
+
+            <div class="d-flex align-items-center gap-2">
+              <span class="chip">
+                <i class="bi bi-mic-fill me-2"></i>Micrófono
+              </span>
+
+              <!-- 🛈 PISTA PARA EL USUARIO -->
+              <span class="nav-hint d-none d-md-inline">
+                Presiona la bocina para escuchar cómo usarlo <span class="me-1">👉</span>
+              </span>
+
+              <!-- 🔊 BOTÓN DE AUDIO -->
+              <button id="infoVoiceBtn" class="btn btn-sm btn-outline-light rounded-circle speaker-btn speaker-pulse"
+                type="button" title="Presiona para escuchar instrucciones">
+                <i class="bi bi-volume-up-fill"></i>
+              </button>
+
+              <!-- ESTADO -->
+              <span id="modePill" class="pill pill-idle">
+                <i class="bi bi-circle-fill me-2"></i>Listo
+              </span>
+            </div>
+          </div>
+
+          <div id="transcript" class="transcript">—</div>
+
+          <hr class="divider my-4">
+
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <div class="section-title">
+              <i class="bi bi-robot me-2"></i>Orden final (Voz)
+            </div>
+
+            <span class="chip chip-soft">
+              <i class="bi bi-lightning-charge-fill me-2"></i>Acción
+            </span>
+          </div>
+
+          <div id="command" class="command">—</div>
+
+          <div id="substatus" class="substatus mt-4">
+            <i class="bi bi-info-circle me-2"></i>
+            Pide permisos del micrófono. En suspendido di <b>Alpha</b> para despertar.
+          </div>
+
+          <div class="mt-4 small text-secondary tips">
+            <span class="kbd">Alpha</span> despierta •
+            Prueba: <span class="kbd">avanzar</span> <span class="kbd">detener</span> <span class="kbd">90 derecha</span>
+            <span class="kbd">90 izquierda</span><span class="kbd">retroceder</span><span class="kbd">vuelta izquierda</span>
+            <span class="kbd">vuelta derecha</span><span class="kbd">360 izquierda</span><span class="kbd">360 derecha</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- =========================
+           PESTAÑA: GESTOS
+      ========================== -->
+      <div class="tab-pane fade" id="pane-gestos" role="tabpanel" aria-labelledby="tab-gestos" tabindex="0">
+        <div class="mx-auto gesture-wrap">
+          <div class="glass-card overflow-hidden">
+            <div class="glass-header d-flex align-items-center justify-content-between flex-wrap gap-2">
+              <div>
+                <div class="glass-title">Panel de Control</div>
+                <div class="glass-subtitle">Gestos fáciles + modo suspender/despertar</div>
+              </div>
+
+              <div class="d-flex gap-2 flex-wrap">
+                <button id="btnStart" class="btn btn-pill-primary">▶ Iniciar</button>
+                <button id="btnStop" class="btn btn-pill-danger" disabled>■ Detener</button>
+                <button id="btnToggleSuspend" class="btn btn-pill" disabled>⏸ Suspender</button>
+
+                <span id="modeBadge" class="badge text-bg-success align-self-center">ACTIVO</span>
+              </div>
+            </div>
+
+            <div class="p-3 p-md-4">
+              <div class="row g-3 align-items-stretch">
+
+                <!-- CÁMARA -->
+                <div class="col-12 col-lg-7">
+                  <div class="mini-panel h-100">
+                    <div class="d-flex align-items-center justify-content-between mb-2">
+                      <div class="text-white-50 small">CÁMARA</div>
+                      <div class="text-white-50 small">Mantén la mano centrada</div>
+                    </div>
+
+                    <div class="video-wrap position-relative">
+                      <video id="video" class="w-100 h-100" autoplay playsinline muted></video>
+                      <canvas id="overlay" class="overlay-canvas"></canvas>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- ORDEN + ESTADO -->
+                <div class="col-12 col-lg-5">
+                  <div class="d-flex flex-column gap-3 h-100">
+
+                    <div class="mini-panel">
+                      <div class="text-white-50 small mb-2">ORDEN FINAL (Gestos)</div>
+                      <div id="commandText" class="big-command">—</div>
+                      <div class="text-white-50 small mt-2">Si no coincide: “Orden no reconocida”.</div>
+                    </div>
+
+                    <div class="mini-panel flex-grow-1">
+                      <div class="text-white-50 small">ESTADO</div>
+                      <div id="statusText" class="fw-semibold mt-1">Listo para iniciar.</div>
+                      <div id="debugText" class="text-white-50 small mt-2"></div>
+                    </div>
+
+                  </div>
+                </div>
+
+                <!-- INSTRUCCIONES -->
+                <div class="col-12">
+                  <div class="mini-panel instructions-bar">
+                    <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-2">
+                      <div class="text-white-50 small">INSTRUCCIONES (gestos fáciles)</div>
+                      <div class="text-white-50 small">Tips: buena luz • mano completa • sostén el gesto 0.5–1s</div>
+                    </div>
+
+                    <div class="d-flex flex-wrap gap-2">
+                      <span class="badge text-bg-dark border border-white border-opacity-10">Avanzar: palma (5)</span>
+                      <span class="badge text-bg-dark border border-white border-opacity-10">Retroceder: puño (0)</span>
+                      <span class="badge text-bg-dark border border-white border-opacity-10">Detener: OK</span>
+                      <span class="badge text-bg-dark border border-white border-opacity-10">Vuelta der: índice →</span>
+                      <span class="badge text-bg-dark border border-white border-opacity-10">Vuelta izq: índice ←</span>
+                      <span class="badge text-bg-dark border border-white border-opacity-10">90° der: pulgar →</span>
+                      <span class="badge text-bg-dark border border-white border-opacity-10">90° izq: pulgar ←</span>
+                      <span class="badge text-bg-dark border border-white border-opacity-10">360° der: 3 dedos</span>
+                      <span class="badge text-bg-dark border border-white border-opacity-10">360° izq: 2 dedos</span>
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <footer class="py-3 footer-glass">
+    <div class="container small d-flex justify-content-between flex-wrap gap-2">
+      <span class="text-secondary">Bootstrap + OpenAI + MediaPipe</span>
+      <span class="text-light">Axel Llanderal Arteaga N.C. 22200784</span>
+    </div>
+  </footer>
+
+  <!-- Bootstrap -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+  <!-- Scripts separados (importante por MediaPipe módulo) -->
+  <script src="assets/js/voice.js"></script>
+  <script type="module" src="assets/js/gestures.js"></script>
+
+  <!-- Bridge global: muestra la última orden detectada -->
+  <script>
+    const globalEl = document.getElementById("globalCommand");
+    window.addEventListener("control:command", (e) => {
+      const cmd = e?.detail?.command || "—";
+      if (globalEl) globalEl.textContent = cmd;
+    });
+  </script>
+</body>
+
+</html>
